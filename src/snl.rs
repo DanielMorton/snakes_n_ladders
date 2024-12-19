@@ -79,8 +79,8 @@ fn create_transition_matrix(snl_map: &HashMap<usize, usize>) -> Vec<Vec<f64>> {
 
     for i in 0..=BOARD_SIZE {
         if !snl_map.contains_key(&i) {
-            for j in (i + 1)..=min(i + DICE_SIDES, BOARD_SIZE) {
-                let destination = *snl_map.get(&j).unwrap_or(&j);
+            for j in (i + 1)..=(i + DICE_SIDES) {
+                let destination = *min(snl_map.get(&j).unwrap_or(&j), &BOARD_SIZE);
                 matrix[i][destination] += 1.0 / DICE_SIDES as f64;
             }
         }
