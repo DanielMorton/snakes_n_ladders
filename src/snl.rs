@@ -24,15 +24,10 @@ pub fn snakes_n_ladders() {
 
     let start_time = Instant::now();
     let mut moves = simulate_games(num_iterations, start_position, &transition_matrix, &possible_positions);
+    moves.sort();
     print_hms(&start_time);
 
     print_statistics(&moves);
-
-    let sort_time = Instant::now();
-    moves.sort();
-    print_hms(&sort_time);
-
-    println!("Median: {}", calculate_median(&moves));
 }
 
 fn parse_arguments() -> clap::ArgMatches {
@@ -85,7 +80,6 @@ fn create_transition_matrix(snl_map: &HashMap<usize, usize>) -> Vec<Vec<f64>> {
             }
         }
     }
-    println!("{:?}", &matrix);
     matrix
 }
 
@@ -126,6 +120,8 @@ fn print_statistics(moves: &[u64]) {
     println!("Maximum moves: {}", max_moves);
     println!("Mean moves: {}", mean);
     println!("Standard deviation: {}", f64::sqrt(variance));
+
+    println!("Median: {}", calculate_median(moves));
 }
 
 fn calculate_median(moves: &[u64]) -> f64 {
