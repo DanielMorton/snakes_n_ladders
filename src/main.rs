@@ -1,13 +1,13 @@
 mod cube;
+mod shuffle;
 mod snl;
 mod util;
-mod shuffle;
 
-use std::cmp::max;
-use std::time::Instant;
-use itertools::Itertools;
 use crate::cube::cube_sim;
 use crate::snl::snakes_n_ladders;
+use itertools::Itertools;
+use std::cmp::max;
+use std::time::Instant;
 
 fn print_hms(start: &Instant) {
     let millis = start.elapsed().as_millis();

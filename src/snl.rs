@@ -1,12 +1,7 @@
 use clap::{value_parser, Arg, Command};
 use rand::prelude::*;
 use rayon::prelude::*;
-use std::{
-    cmp::min,
-    collections::HashMap,
-    sync::Arc,
-    time::Instant,
-};
+use std::{cmp::min, collections::HashMap, sync::Arc, time::Instant};
 
 use crate::util::print_hms;
 
@@ -23,7 +18,12 @@ pub fn snakes_n_ladders() {
     let possible_positions = Arc::new((0..=BOARD_SIZE).collect::<Vec<usize>>());
 
     let start_time = Instant::now();
-    let mut moves = simulate_games(num_iterations, start_position, &transition_matrix, &possible_positions);
+    let mut moves = simulate_games(
+        num_iterations,
+        start_position,
+        &transition_matrix,
+        &possible_positions,
+    );
     moves.sort();
     print_hms(&start_time);
 
@@ -55,10 +55,25 @@ fn get_num_iterations(matches: &clap::ArgMatches) -> u64 {
 
 fn create_snakes_and_ladders_map() -> HashMap<usize, usize> {
     HashMap::from([
-        (1, 38), (4, 14), (9, 31), (16, 6), (21, 42),
-        (28, 84), (36, 44), (47, 26), (49, 11), (51, 67),
-        (56, 53), (62, 19), (64, 60), (71, 91), (80, 100),
-        (87, 24), (93, 73), (95, 75), (98, 78),
+        (1, 38),
+        (4, 14),
+        (9, 31),
+        (16, 6),
+        (21, 42),
+        (28, 84),
+        (36, 44),
+        (47, 26),
+        (49, 11),
+        (51, 67),
+        (56, 53),
+        (62, 19),
+        (64, 60),
+        (71, 91),
+        (80, 100),
+        (87, 24),
+        (93, 73),
+        (95, 75),
+        (98, 78),
     ])
 }
 
