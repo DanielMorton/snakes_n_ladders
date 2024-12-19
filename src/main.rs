@@ -7,6 +7,7 @@ use std::cmp::max;
 use std::time::Instant;
 use itertools::Itertools;
 use crate::cube::cube_sim;
+use crate::snl::snakes_n_ladders;
 
 fn print_hms(start: &Instant) {
     let millis = start.elapsed().as_millis();
@@ -16,5 +17,5 @@ fn print_hms(start: &Instant) {
 }
 
 fn main() {
-    cube_sim();
+    snakes_n_ladders();
 }

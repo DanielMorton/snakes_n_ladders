@@ -63,6 +63,7 @@ pub fn snakes_n_ladders() {
             }
         }
     }
+    println!("{:?}", M);
     let choice = Arc::new((0..=100).collect::<Vec<usize>>());
     let s = Instant::now();
     let mut moves = (0..N)
