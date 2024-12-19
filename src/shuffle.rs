@@ -1,8 +1,8 @@
 use itertools::equal;
 
 fn shuffle(array: &[u32]) -> Vec<u32>{
-    let M = array.len()/2;
-    let (start, end) = (&array[..M], &array[M..]);
+    let m = array.len()/2;
+    let (start, end) = (&array[..m], &array[m..]);
     start.iter().zip(end.iter()).map(|(&x,&y)| vec![x, y]).flatten().collect::<Vec<_>>()
 }
 
