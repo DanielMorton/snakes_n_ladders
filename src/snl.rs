@@ -23,7 +23,7 @@ pub struct SnlArgs {
 pub fn snakes_n_ladders(args: SnlArgs) {
     let num_iterations = args.num_iterations;
     let snl_map = create_snakes_and_ladders_map();
-    let start_position = args.start;
+    let start_position = *snl_map.get(&args.start).unwrap_or(&args.start);
 
     let transition_matrix = create_transition_matrix(&snl_map);
     let possible_positions = Arc::new((0..=BOARD_SIZE).collect::<Vec<usize>>());
@@ -68,11 +68,11 @@ fn create_snakes_and_ladders_map() -> HashMap<usize, usize> {
 fn create_transition_matrix(snl_map: &HashMap<usize, usize>) -> Vec<Vec<f64>> {
     let mut matrix = vec![vec![0.0; BOARD_SIZE + 1]; BOARD_SIZE + 1];
 
-    for i in 0..=BOARD_SIZE {
+    for (i, row) in matrix.iter_mut().enumerate().take(BOARD_SIZE + 1)  {
         if !snl_map.contains_key(&i) {
             for j in (i + 1)..=(i + DICE_SIDES) {
                 let destination = *min(snl_map.get(&j).unwrap_or(&j), &BOARD_SIZE);
-                matrix[i][destination] += 1.0 / DICE_SIDES as f64;
+                row[destination] += 1.0 / DICE_SIDES as f64;
             }
         }
     }

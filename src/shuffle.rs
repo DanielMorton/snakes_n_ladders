@@ -13,8 +13,7 @@ fn shuffle(array: &[u32]) -> Vec<u32> {
     start
         .iter()
         .zip(end.iter())
-        .map(|(&x, &y)| vec![x, y])
-        .flatten()
+        .flat_map(|(&x, &y)| vec![x, y])
         .collect::<Vec<_>>()
 }
 
