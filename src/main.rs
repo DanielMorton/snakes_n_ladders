@@ -1,21 +1,37 @@
+use crate::cube::{cube_sim, CubeArgs};
+use crate::shuffle::shuffle_count;
+use crate::snl::{snakes_n_ladders, SnlArgs};
+use clap::{Parser, Subcommand}; // Added the necessary imports
+
 mod cube;
 mod shuffle;
 mod snl;
 mod util;
 
-use crate::cube::cube_sim;
-use crate::snl::snakes_n_ladders;
-use itertools::Itertools;
-use std::cmp::max;
-use std::time::Instant;
+#[derive(Parser)]
+#[command(author, version, about, long_about = None)]
+struct Cli {
+    #[command(subcommand)]
+    command: Commands,
+}
 
-fn print_hms(start: &Instant) {
-    let millis = start.elapsed().as_millis();
-    let seconds = millis / 1000;
-    let (hour, minute, second) = (seconds / 3600, (seconds % 3600) / 60, seconds % 60);
-    println!("{:02}:{:02}:{:02}.{}", hour, minute, second, millis % 1000)
+#[derive(Subcommand)]
+enum Commands {
+    /// Run the cube simulation
+    Cube(CubeArgs),
+    /// Run the shuffle counter
+    Shuffle,
+    /// Run snakes and ladders simulation
+    #[command(name = "snakes-ladders")]
+    SnakesLadders(SnlArgs),
 }
 
 fn main() {
-    snakes_n_ladders();
+    let cli = Cli::parse();
+
+    match cli.command {
+        Commands::Cube(args) => cube_sim(args),
+        Commands::Shuffle => shuffle_count(),
+        Commands::SnakesLadders(args) => snakes_n_ladders(args),
+    }
 }

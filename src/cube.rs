@@ -1,79 +1,81 @@
-use crate::util::print_hms;
-use clap::{value_parser, Arg, Command};
+use clap::{value_parser, Args};
 use rand::prelude::SliceRandom;
 use rand::thread_rng;
 use rayon::prelude::*;
-use std::sync::Arc;
-use std::time::Instant;
+use std::{sync::Arc, time::Instant};
 
-pub fn cube_sim() {
-    let matches = Command::new("cube")
-        .arg(
-            Arg::new("N")
-                .short('N')
-                .required(true)
-                .value_parser(value_parser!(u64)),
-        )
-        .arg(
-            Arg::new("dim")
-                .long("dim")
-                .required(true)
-                .value_parser(value_parser!(u8)),
-        )
-        .arg(
-            Arg::new("start")
-                .long("start")
-                .required(false)
-                .value_parser(value_parser!(usize)),
-        )
-        .arg(
-            Arg::new("end")
-                .long("end")
-                .required(false)
-                .value_parser(value_parser!(usize)),
-        )
-        .get_matches();
-    let N = match matches.get_one::<u64>("N") {
-        Some(&n) => n,
-        None => panic!("Number of Iterations not specified."),
-    };
-    let dim = match matches.get_one::<u8>("dim") {
-        Some(&d) => d,
-        None => panic!("No dim specified."),
-    };
-    let start = match matches.get_one::<usize>("start") {
-        Some(&s) => s,
-        None => 0,
-    };
-    let end = match matches.get_one::<usize>("end") {
-        Some(&s) => s,
-        None => (1 << dim) - 1,
-    };
-    let choice = Arc::new((0..dim).collect::<Vec<u8>>());
-    let s = Instant::now();
-    let moves = (0..N)
+use crate::util::print_hms;
+
+#[derive(Args)]
+pub struct CubeArgs {
+    #[arg(short = 'n', required = true, value_parser = value_parser!(u64))]
+    num_iterations: u64,
+
+    #[arg(long = "dim", required = true, value_parser = value_parser!(u8))]
+    dim: u8,
+
+    #[arg(long = "start", required = false, value_parser = value_parser!(usize), default_value="0")]
+    start: usize,
+}
+
+struct SimulationResults {
+    mean: f64,
+    standard_deviation: f64,
+}
+
+impl SimulationResults {
+    fn from_moves(moves: &[u64]) -> Self {
+        let move_sum: f64 = moves.iter().sum::<u64>() as f64;
+        let count = moves.len() as f64;
+        let mean = move_sum / count;
+
+        let sum_squares: f64 = moves.iter().map(|&x| x as f64 * x as f64).sum();
+        let variance = (sum_squares / count) - (mean * mean);
+
+        Self {
+            mean,
+            standard_deviation: f64::sqrt(variance),
+        }
+    }
+
+    fn print(&self) {
+        println!("Mean moves: {}", self.mean);
+        println!("Standard deviation: {}", self.standard_deviation);
+    }
+}
+
+pub fn cube_sim(args: CubeArgs) {
+    let dim = args.dim;
+    let num_iterations = args.num_iterations;
+    let start = args.start;
+    let end = (1 << dim) - 1;
+    let possible_moves = Arc::new((0..dim).collect::<Vec<u8>>());
+
+    let start_time = Instant::now();
+
+    let moves: Vec<u64> = (0..num_iterations)
         .into_par_iter()
-        .map(|_| {
-            let (mut corner, mut move_count) = (start, 0);
-            let mut rng = thread_rng();
-            let mut c;
-            while corner != end {
-                move_count += 1;
-                c = match choice.choose(&mut rng) {
-                    Some(&n) => n,
-                    None => panic!("No choice made."),
-                };
-                corner ^= 1 << c;
-            }
-            move_count
-        })
-        .collect::<Vec<_>>();
-    print_hms(&s);
-    let move_sum = moves.iter().sum::<u64>() as f64;
-    let move_length_float = moves.len() as f64;
-    let move_mean = move_sum / move_length_float;
-    let e2 = moves.iter().map(|x| x * x).sum::<u64>() as f64;
-    let move_var = e2 / move_length_float - move_mean * move_mean;
-    println!("{}", move_mean);
-    println!("{}", f64::sqrt(move_var))
+        .map(|_| simulate_single_path(&possible_moves, start, end))
+        .collect();
+
+    print_hms(&start_time);
+
+    let results = SimulationResults::from_moves(&moves);
+    results.print();
+}
+
+fn simulate_single_path(possible_moves: &Arc<Vec<u8>>, start: usize, end: usize) -> u64 {
+    let mut current_corner = start;
+    let mut move_count = 0;
+    let mut rng = thread_rng();
+
+    while current_corner != end {
+        let dimension = possible_moves
+            .choose(&mut rng)
+            .expect("Possible moves vector cannot be empty");
+        current_corner ^= 1 << dimension;
+        move_count += 1;
+    }
+
+    move_count
 }

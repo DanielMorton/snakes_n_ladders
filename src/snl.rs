@@ -1,18 +1,29 @@
-use clap::{value_parser, Arg, Command};
+use clap::{value_parser, Args};
 use rand::prelude::*;
 use rayon::prelude::*;
-use std::{cmp::min, collections::HashMap, sync::Arc, time::Instant};
+use std::cmp::min;
+use std::collections::HashMap;
+use std::sync::Arc;
+use std::time::Instant;
 
 use crate::util::print_hms;
 
 const BOARD_SIZE: usize = 100;
 const DICE_SIDES: usize = 6;
 
-pub fn snakes_n_ladders() {
-    let args = parse_arguments();
-    let num_iterations = get_num_iterations(&args);
+#[derive(Args)]
+pub struct SnlArgs {
+    #[arg(short = 'n', required = true, value_parser = value_parser!(u64))]
+    num_iterations: u64,
+
+    #[arg(long = "start", required = true, value_parser = value_parser!(usize), default_value="0")]
+    start: usize,
+}
+
+pub fn snakes_n_ladders(args: SnlArgs) {
+    let num_iterations = args.num_iterations;
     let snl_map = create_snakes_and_ladders_map();
-    let start_position = get_start_position(&args, &snl_map);
+    let start_position = args.start;
 
     let transition_matrix = create_transition_matrix(&snl_map);
     let possible_positions = Arc::new((0..=BOARD_SIZE).collect::<Vec<usize>>());
@@ -28,29 +39,6 @@ pub fn snakes_n_ladders() {
     print_hms(&start_time);
 
     print_statistics(&moves);
-}
-
-fn parse_arguments() -> clap::ArgMatches {
-    Command::new("snl")
-        .arg(
-            Arg::new("N")
-                .short('N')
-                .required(true)
-                .value_parser(value_parser!(u64)),
-        )
-        .arg(
-            Arg::new("start")
-                .long("start")
-                .required(false)
-                .value_parser(value_parser!(usize)),
-        )
-        .get_matches()
-}
-
-fn get_num_iterations(matches: &clap::ArgMatches) -> u64 {
-    *matches
-        .get_one::<u64>("N")
-        .expect("Number of Iterations not specified.")
 }
 
 fn create_snakes_and_ladders_map() -> HashMap<usize, usize> {
@@ -75,13 +63,6 @@ fn create_snakes_and_ladders_map() -> HashMap<usize, usize> {
         (95, 75),
         (98, 78),
     ])
-}
-
-fn get_start_position(matches: &clap::ArgMatches, snl_map: &HashMap<usize, usize>) -> usize {
-    matches
-        .get_one::<usize>("start")
-        .map(|s| *snl_map.get(s).unwrap_or(s))
-        .unwrap_or(0)
 }
 
 fn create_transition_matrix(snl_map: &HashMap<usize, usize>) -> Vec<Vec<f64>> {
