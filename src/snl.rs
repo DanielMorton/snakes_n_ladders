@@ -68,7 +68,7 @@ fn create_snakes_and_ladders_map() -> HashMap<usize, usize> {
 fn create_transition_matrix(snl_map: &HashMap<usize, usize>) -> Vec<Vec<f64>> {
     let mut matrix = vec![vec![0.0; BOARD_SIZE + 1]; BOARD_SIZE + 1];
 
-    for (i, row) in matrix.iter_mut().enumerate().take(BOARD_SIZE + 1)  {
+    for (i, row) in matrix.iter_mut().enumerate().take(BOARD_SIZE + 1) {
         if !snl_map.contains_key(&i) {
             for j in (i + 1)..=(i + DICE_SIDES) {
                 let destination = *min(snl_map.get(&j).unwrap_or(&j), &BOARD_SIZE);
