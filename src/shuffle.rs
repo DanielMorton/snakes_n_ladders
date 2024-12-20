@@ -1,5 +1,11 @@
-use clap::{value_parser, Arg, Command};
+use clap::{value_parser, Args};
 use itertools::equal;
+
+#[derive(Args)]
+pub struct ShuffleArgs {
+    #[arg(short = 'n', required = true, value_parser = value_parser!(u32))]
+    n: u32,
+}
 
 fn shuffle(array: &[u32]) -> Vec<u32> {
     let m = array.len() / 2;
@@ -12,19 +18,8 @@ fn shuffle(array: &[u32]) -> Vec<u32> {
         .collect::<Vec<_>>()
 }
 
-pub fn shuffle_count() {
-    let matches = Command::new("cube")
-        .arg(
-            Arg::new("n")
-                .short('n')
-                .required(true)
-                .value_parser(value_parser!(u64))
-                .help("Number of iterations to run"),
-        )
-        .get_matches();
-    let cards = 2 * *matches
-        .get_one::<u32>("n")
-        .expect("Number of cards divided by 2");
+pub fn shuffle_count(args: ShuffleArgs) {
+    let cards = 2 * args.n;
     let first_array = (1..=cards).collect::<Vec<_>>();
     let mut array = shuffle(&first_array);
     let mut count = 1;
