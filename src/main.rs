@@ -31,7 +31,7 @@ fn main() {
 
     match cli.command {
         Commands::Cube(args) => cube_sim(args),
-        Commands::Shuffle(args)=> shuffle_count(args),
+        Commands::Shuffle(args) => shuffle_count(args),
         Commands::SnakesLadders(args) => snakes_n_ladders(args),
     }
 }
