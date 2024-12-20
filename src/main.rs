@@ -1,5 +1,5 @@
 use crate::cube::{cube_sim, CubeArgs};
-use crate::shuffle::{shuffle_count, ShuffleArgs};
+use crate::shuffle::{shuffle_instance, shuffle_sim, ShuffleArgs};
 use crate::snl::{snakes_n_ladders, SnlArgs};
 use clap::{Parser, Subcommand}; // Added the necessary imports
 
@@ -21,6 +21,8 @@ enum Commands {
     Cube(CubeArgs),
     /// Run the shuffle counter
     Shuffle(ShuffleArgs),
+    #[command(name = "shuffle-sim")]
+    ShuffleSim(ShuffleArgs),
     /// Run snakes and ladders simulation
     #[command(name = "snakes-ladders")]
     SnakesLadders(SnlArgs),
@@ -31,7 +33,8 @@ fn main() {
 
     match cli.command {
         Commands::Cube(args) => cube_sim(args),
-        Commands::Shuffle(args) => shuffle_count(args),
+        Commands::Shuffle(args) => shuffle_instance(args),
+        Commands::ShuffleSim(args) => shuffle_sim(args),
         Commands::SnakesLadders(args) => snakes_n_ladders(args),
     }
 }
