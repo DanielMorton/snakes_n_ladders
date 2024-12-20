@@ -105,6 +105,7 @@ fn simulate_games(
 }
 
 fn print_statistics(moves: &[u64]) {
+    let min_moves = moves.iter().min().unwrap();
     let max_moves = moves.iter().max().unwrap();
     let move_sum: f64 = moves.iter().sum::<u64>() as f64;
     let moves_length = moves.len() as f64;
@@ -113,6 +114,7 @@ fn print_statistics(moves: &[u64]) {
     let mean = move_sum / moves_length;
     let variance = squared_sum / moves_length - mean * mean;
 
+    println!("Minimum moves: {}", min_moves);
     println!("Maximum moves: {}", max_moves);
     println!("Mean moves: {}", mean);
     println!("Standard deviation: {}", f64::sqrt(variance));
