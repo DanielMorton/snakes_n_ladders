@@ -33,6 +33,23 @@ fn shuffle_count(cards: u32) -> u32 {
     count
 }
 
+fn write_result(shuffles: &[u32]) {
+    let filename = "shuffle_results.csv";
+
+    // Create and write to file
+    let mut file = File::create(&filename).expect("Failed to create file");
+
+    // Write header
+    writeln!(file, "cards, shuffles").expect("Failed to write header");
+
+    // Write data
+   shuffles.iter().enumerate().for_each(|(i, sc)| {
+        writeln!(file, "{},{}", (i + 1) * 2, sc).expect("Failed to write data");
+    });
+
+    println!("Results written to {}", filename);
+}
+
 pub fn shuffle_instance(args: ShuffleArgs) {
     let cards = 2 * args.n;
     let count = shuffle_count(cards);
@@ -46,19 +63,6 @@ pub fn shuffle_sim(args: ShuffleArgs) {
         .into_par_iter()
         .map(|c| shuffle_count(2 * c))
         .collect::<Vec<_>>();
-    let filename = "shuffle_results.csv";
-
-    // Create and write to file
-    let mut file = File::create(&filename).expect("Failed to create file");
-
-    // Write header
-    writeln!(file, "cards, shuffles").expect("Failed to write header");
-
-    // Write data
-    for (i, shuffle_count) in shuffles.iter().enumerate() {
-        writeln!(file, "{},{}", (i + 1) * 2, shuffle_count).expect("Failed to write data");
-    }
-
-    println!("Results written to {}", filename);
+    write_result(&shuffles);
     print_hms(&start_time)
 }
