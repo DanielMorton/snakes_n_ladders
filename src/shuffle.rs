@@ -46,7 +46,7 @@ pub fn shuffle_sim(args: ShuffleArgs) {
         .into_par_iter()
         .map(|c| shuffle_count(2 * c))
         .collect::<Vec<_>>();
-    let filename = format!("shuffle_results.csv");
+    let filename = "shuffle_results.csv";
 
     // Create and write to file
     let mut file = File::create(&filename).expect("Failed to create file");
