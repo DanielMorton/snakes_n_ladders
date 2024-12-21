@@ -1,10 +1,10 @@
+use crate::util::print_hms;
 use clap::{value_parser, Args};
 use itertools::equal;
-use rayon::prelude::{ParallelIterator,IntoParallelIterator};
+use rayon::prelude::{IntoParallelIterator, ParallelIterator};
 use std::fs::File;
 use std::io::Write;
 use std::time::Instant;
-use crate::util::print_hms;
 
 #[derive(Args)]
 pub struct ShuffleArgs {

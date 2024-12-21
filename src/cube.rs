@@ -18,30 +18,28 @@ pub struct CubeArgs {
     start: usize,
 }
 
-struct SimulationResults {
-    mean: f64,
-    standard_deviation: f64,
-}
+fn print(moves: &[u64]) {
+    let min_moves = moves.iter().min().expect("Move array empty.");
+    let min_moves_count = moves
+        .iter()
+        .filter(|&m| m == min_moves)
+        .collect::<Vec<_>>()
+        .len();
+    let move_sum: f64 = moves.iter().sum::<u64>() as f64;
+    let count = moves.len() as f64;
+    let mean = move_sum / count;
 
-impl SimulationResults {
-    fn from_moves(moves: &[u64]) -> Self {
-        let move_sum: f64 = moves.iter().sum::<u64>() as f64;
-        let count = moves.len() as f64;
-        let mean = move_sum / count;
+    let sum_squares: f64 = moves.iter().map(|&x| x as f64 * x as f64).sum();
+    let variance = (sum_squares / count) - (mean * mean);
 
-        let sum_squares: f64 = moves.iter().map(|&x| x as f64 * x as f64).sum();
-        let variance = (sum_squares / count) - (mean * mean);
+    println!("Shortest Path Length: {}", min_moves);
+    println!(
+        "Shortest Path Fraction: {}",
+        (min_moves_count as f64) / (moves.len() as f64)
+    );
 
-        Self {
-            mean,
-            standard_deviation: f64::sqrt(variance),
-        }
-    }
-
-    fn print(&self) {
-        println!("Mean moves: {}", self.mean);
-        println!("Standard deviation: {}", self.standard_deviation);
-    }
+    println!("Mean moves: {}", mean);
+    println!("Standard deviation: {}", f64::sqrt(variance));
 }
 
 pub fn cube_sim(args: CubeArgs) {
@@ -60,8 +58,7 @@ pub fn cube_sim(args: CubeArgs) {
 
     print_hms(&start_time);
 
-    let results = SimulationResults::from_moves(&moves);
-    results.print();
+    print(&moves);
 }
 
 fn simulate_single_path(possible_moves: &Arc<Vec<u8>>, start: usize, end: usize) -> u64 {
