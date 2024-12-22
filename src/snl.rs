@@ -3,6 +3,8 @@ use rand::prelude::*;
 use rayon::prelude::*;
 use std::cmp::min;
 use std::collections::HashMap;
+use std::fs::File;
+use std::io::Write;
 use std::sync::Arc;
 use std::time::Instant;
 
@@ -18,6 +20,64 @@ pub struct SnlArgs {
 
     #[arg(long = "start", required = true, value_parser = value_parser!(usize), default_value="0")]
     start: usize,
+}
+
+struct SnlStatistics {
+    start: usize,
+    min_moves: u64,
+    max_moves: u64,
+    mean_moves: f64,
+    standard_deviation: f64,
+    median_moves: f64
+}
+
+impl SnlStatistics {
+    fn new(start: usize, moves: &[u64]) -> Self {
+        let &min_moves = moves.iter().min().expect("Moves array empty.");
+        let &max_moves = moves.iter().max().expect("Moves array empty.");
+        let move_sum = moves.iter().sum::<u64>() as f64;
+        let moves_length = moves.len() as f64;
+        let squared_sum = moves.iter().map(|&x| x * x).sum::<u64>() as f64;
+
+        let mean = move_sum / moves_length;
+        let variance = squared_sum / moves_length - mean * mean;
+        let standard_deviation = f64::sqrt(variance);
+        let median = calculate_median(moves);
+
+        SnlStatistics {
+            start,
+            min_moves,
+            max_moves,
+            mean_moves: mean,
+            standard_deviation,
+            median_moves: median
+        }
+    }
+
+    fn write_statistics(&self, file: &mut File) {
+        writeln!(file, "{},{},{},{},{},{}", self.start,self.min_moves, self.median_moves, self.max_moves,
+                 self.mean_moves, self.standard_deviation).expect("Failed to write data");
+    }
+}
+
+pub fn snl_simulation(args: SnlArgs) {
+    let start_time = Instant::now();
+    let filename = "snl_results.csv";
+    let mut file = File::create(&filename).expect("Failed to create file");
+    writeln!(file, "start,min,median,max,mean,standard deviation").expect("Failed to write header");
+    // Create and write to file
+    let mut file = File::create(&filename).expect("Failed to create file");
+    let num_iterations = args.num_iterations;
+    let snl_map = create_snakes_and_ladders_map();
+    let transition_matrix = create_transition_matrix(&snl_map);
+    let possible_positions = Arc::new((0..=BOARD_SIZE).collect::<Vec<usize>>());
+    (0..=99).filter(|s| !snl_map.contains_key(s)).for_each(|s| {
+        let mut moves =simulate_games(num_iterations, s, &transition_matrix, &possible_positions);
+        moves.sort();
+        let stats = SnlStatistics::new(s, &moves);
+        stats.write_statistics(&mut file);
+    });
+    print_hms(&start_time)
 }
 
 pub fn snakes_n_ladders(args: SnlArgs) {
@@ -104,12 +164,13 @@ fn simulate_games(
         .collect()
 }
 
+
 fn print_statistics(moves: &[u64]) {
-    let min_moves = moves.iter().min().unwrap();
-    let max_moves = moves.iter().max().unwrap();
-    let move_sum: f64 = moves.iter().sum::<u64>() as f64;
+    let min_moves = moves.iter().min().expect("Moves array empty.");
+    let max_moves = moves.iter().max().expect("Moves array empty.");
+    let move_sum = moves.iter().sum::<u64>() as f64;
     let moves_length = moves.len() as f64;
-    let squared_sum: f64 = moves.iter().map(|&x| x * x).sum::<u64>() as f64;
+    let squared_sum = moves.iter().map(|&x| x * x).sum::<u64>() as f64;
 
     let mean = move_sum / moves_length;
     let variance = squared_sum / moves_length - mean * mean;
