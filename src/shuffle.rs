@@ -43,7 +43,7 @@ fn write_result(shuffles: &[u32]) {
     writeln!(file, "cards, shuffles").expect("Failed to write header");
 
     // Write data
-   shuffles.iter().enumerate().for_each(|(i, sc)| {
+    shuffles.iter().enumerate().for_each(|(i, sc)| {
         writeln!(file, "{},{}", (i + 1) * 2, sc).expect("Failed to write data");
     });
 

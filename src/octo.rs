@@ -1,21 +1,16 @@
-use clap::{value_parser, Args};
-use rand::prelude::SliceRandom;
-use rand::thread_rng;
-use rayon::prelude::*;
-use std::{sync::Arc, time::Instant};
-
 use crate::util::print_hms;
+use clap::{value_parser, Args};
+use rand::Rng;
+use rayon::prelude::*;
+use std::time::Instant;
 
 #[derive(Args)]
-pub struct CubeArgs {
+pub struct OctoArgs {
     #[arg(short = 'n', required = true, value_parser = value_parser!(u64))]
     num_iterations: u64,
 
-    #[arg(long = "dim", required = true, value_parser = value_parser!(u8))]
-    dim: u8,
-
-    #[arg(long = "start", required = false, value_parser = value_parser!(usize), default_value="0")]
-    start: usize,
+    #[arg(long = "end", required = true, value_parser = value_parser!(i64))]
+    end: i64,
 }
 
 fn print(moves: &[u64]) {
@@ -29,13 +24,13 @@ fn print(moves: &[u64]) {
     let count = moves.len() as f64;
     let mean = move_sum / count;
 
-    let sum_squares: f64 = moves.iter().map(|&x| x.pow(2)).sum::<u64>() as f64;
+    let sum_squares: f64 = moves.iter().map(|&x|  x.pow(2)).sum::<u64>() as f64;
     let variance = (sum_squares / count) - (mean * mean);
     let std = f64::sqrt(variance);
     let sum_cubes: f64 = moves.iter().map(|&x| x.pow(3)).sum::<u64>() as f64;
-    let mean_cubes = sum_cubes / count;
+    let mean_cubes = sum_cubes/count;
     let m3 = mean_cubes - 3.0 * mean * variance - mean.powi(3);
-    let skew = m3 / std.powi(3);
+    let skew = m3/std.powi(3);
 
     println!("Shortest Path Length: {}", min_moves);
     println!(
@@ -46,21 +41,19 @@ fn print(moves: &[u64]) {
     println!("Mean moves: {}", mean);
     println!("Variance: {}", variance);
     println!("Standard deviation: {}", std);
-    println!("Skew: {}", skew)
+    println!("Skew: {}", skew);
+    println!("Mean Cubes: {}", mean_cubes)
 }
 
-pub fn cube_sim(args: CubeArgs) {
-    let dim = args.dim;
+pub fn octo_sim(args: OctoArgs) {
     let num_iterations = args.num_iterations;
-    let start = args.start;
-    let end = (1 << dim) - 1;
-    let possible_moves = Arc::new((0..dim).collect::<Vec<u8>>());
+    let end = args.end;
 
     let start_time = Instant::now();
 
     let moves: Vec<u64> = (0..num_iterations)
         .into_par_iter()
-        .map(|_| simulate_single_path(&possible_moves, start, end))
+        .map(|_| simulate_single_path(end))
         .collect();
 
     print_hms(&start_time);
@@ -68,18 +61,26 @@ pub fn cube_sim(args: CubeArgs) {
     print(&moves);
 }
 
-fn simulate_single_path(possible_moves: &Arc<Vec<u8>>, start: usize, end: usize) -> u64 {
-    let mut current_corner = start;
-    let mut move_count = 0;
-    let mut rng = thread_rng();
+fn simulate_single_path(n: i64) -> u64 {
+    let mut rng = rand::thread_rng();
+    let mut x = -n;
+    let mut count = 0;
 
-    while current_corner != end {
-        let dimension = possible_moves
-            .choose(&mut rng)
-            .expect("Possible moves vector cannot be empty");
-        current_corner ^= 1 << dimension;
-        move_count += 1;
+    while x != n {
+        // Create a vector of possible values excluding current absolute value
+        let abs_x = x.abs();
+
+        // Generate a random value between 1 and n, excluding abs(x)
+        let y = loop {
+            let val = rng.gen_range(1..=n);
+            if val != abs_x {
+                break val;
+            }
+        };
+
+        // Randomly choose sign
+        x = if rng.gen_bool(0.5) { y } else { -y };
+        count += 1;
     }
-
-    move_count
+    count
 }

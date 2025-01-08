@@ -28,7 +28,7 @@ struct SnlStatistics {
     max_moves: u64,
     mean_moves: f64,
     standard_deviation: f64,
-    median_moves: f64
+    median_moves: f64,
 }
 
 impl SnlStatistics {
@@ -50,13 +50,22 @@ impl SnlStatistics {
             max_moves,
             mean_moves: mean,
             standard_deviation,
-            median_moves: median
+            median_moves: median,
         }
     }
 
     fn write_statistics(&self, file: &mut File) {
-        writeln!(file, "{},{},{},{},{},{}", self.start,self.min_moves, self.median_moves, self.max_moves,
-                 self.mean_moves, self.standard_deviation).expect("Failed to write data");
+        writeln!(
+            file,
+            "{},{},{},{},{},{}",
+            self.start,
+            self.min_moves,
+            self.median_moves,
+            self.max_moves,
+            self.mean_moves,
+            self.standard_deviation
+        )
+        .expect("Failed to write data");
     }
 }
 
@@ -72,7 +81,7 @@ pub fn snl_simulation(args: SnlArgs) {
     let transition_matrix = create_transition_matrix(&snl_map);
     let possible_positions = Arc::new((0..=BOARD_SIZE).collect::<Vec<usize>>());
     (0..=99).filter(|s| !snl_map.contains_key(s)).for_each(|s| {
-        let mut moves =simulate_games(num_iterations, s, &transition_matrix, &possible_positions);
+        let mut moves = simulate_games(num_iterations, s, &transition_matrix, &possible_positions);
         moves.sort();
         let stats = SnlStatistics::new(s, &moves);
         stats.write_statistics(&mut file);
@@ -163,7 +172,6 @@ fn simulate_games(
         })
         .collect()
 }
-
 
 fn print_statistics(moves: &[u64]) {
     let min_moves = moves.iter().min().expect("Moves array empty.");
