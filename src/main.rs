@@ -2,13 +2,15 @@ use crate::cube::{cube_sim, CubeArgs};
 use crate::octo::{octo_sim, OctoArgs};
 use crate::shuffle::{shuffle_instance, shuffle_sim, ShuffleArgs};
 use crate::snl::{snakes_n_ladders, snl_simulation, SnlArgs};
-use clap::{Parser, Subcommand}; // Added the necessary imports
+use clap::{Parser, Subcommand};
+use crate::simplex::{simplex_sim, SimplexArgs}; // Added the necessary imports
 
 mod cube;
 mod octo;
 mod shuffle;
 mod snl;
 mod util;
+mod simplex;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -26,6 +28,7 @@ enum Commands {
     Shuffle(ShuffleArgs),
     #[command(name = "shuffle-sim")]
     ShuffleSim(ShuffleArgs),
+    Simplex(SimplexArgs),
     /// Run snakes and ladders simulation
     #[command(name = "snakes-ladders")]
     SnakesLadders(SnlArgs),
@@ -41,6 +44,7 @@ fn main() {
         Commands::Octo(args) => octo_sim(args),
         Commands::Shuffle(args) => shuffle_instance(args),
         Commands::ShuffleSim(args) => shuffle_sim(args),
+        Commands::Simplex(args) => simplex_sim(args),
         Commands::SnakesLadders(args) => snakes_n_ladders(args),
         Commands::SnlSimulation(args) => snl_simulation(args),
     }
