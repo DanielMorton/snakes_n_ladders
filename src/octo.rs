@@ -71,7 +71,7 @@ fn simulate_single_path(n: i64) -> u64 {
         let abs_x = x.abs();
 
         // Generate a random value between 1 and n, excluding abs(x)
-        let y = loop {
+        x = loop {
             let val = rng.gen_range(1..=n);
             if val != abs_x {
                 break val;
@@ -79,7 +79,7 @@ fn simulate_single_path(n: i64) -> u64 {
         };
 
         // Randomly choose sign
-        x = if rng.gen_bool(0.5) { y } else { -y };
+        x = if rng.gen_bool(0.5) { x } else { -x };
         count += 1;
     }
     count

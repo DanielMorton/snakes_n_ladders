@@ -29,13 +29,9 @@ fn print(moves: &[u64]) {
     let count = moves.len() as f64;
     let mean = move_sum / count;
 
-    let sum_squares: f64 = moves.iter().map(|&x| x.pow(2)).sum::<u64>() as f64;
-    let variance = (sum_squares / count) - (mean * mean);
+    let variance = moves.iter().map(|&x| (x as f64 - mean).powi(2)).sum::<f64>()/count;
     let std = f64::sqrt(variance);
-    let sum_cubes: f64 = moves.iter().map(|&x| x.pow(3)).sum::<u64>() as f64;
-    let mean_cubes = sum_cubes / count;
-    let m3 = mean_cubes - 3.0 * mean * variance - mean.powi(3);
-    let skew = m3 / std.powi(3);
+    let skew = moves.iter().map(|&x| ((x as f64 - mean)/std).powi(3)).sum::<f64>()/count;
 
     println!("Shortest Path Length: {}", min_moves);
     println!(
