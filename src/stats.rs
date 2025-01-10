@@ -82,7 +82,7 @@ impl SimulationStats {
         println!("Median: {}", self.median)
     }
 
-    pub(crate) fn write_header(&self) -> String {
+    pub(crate) fn header(&self) -> String {
         format!(
             "{},{},{},{},{},{},{},{},{},{}",
             stringify!(self.min_moves),
