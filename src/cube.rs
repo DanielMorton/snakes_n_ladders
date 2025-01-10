@@ -50,7 +50,7 @@ pub fn cube_sim(args: CubeArgs) -> Result<(), SimulationError> {
 
     print_hms(&start_time);
 
-    let stats = SimulationStats::from_moves(&moves)?;
+    let stats = SimulationStats::from_values(&moves)?;
     stats.print();
 
     Ok(())

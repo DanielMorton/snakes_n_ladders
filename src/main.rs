@@ -46,7 +46,7 @@ fn main() {
         Commands::Shuffle(args) => shuffle_instance(args),
         Commands::ShuffleSim(args) => shuffle_sim(args),
         Commands::Simplex(args) => simplex_sim(args).expect("Simplex Simulation."),
-        Commands::SnakesLadders(args) => snakes_n_ladders(args),
-        Commands::SnlSimulation(args) => snl_simulation(args),
+        Commands::SnakesLadders(args) => snakes_n_ladders(args).expect("Single Run Snakes and Ladders."),
+        Commands::SnlSimulation(args) => snl_simulation(args).expect("Snakes and Ladders for All Starting Points"),
     }
 }
