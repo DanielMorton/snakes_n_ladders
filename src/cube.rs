@@ -3,6 +3,7 @@ use rand::prelude::SliceRandom;
 use rand::thread_rng;
 use rayon::prelude::*;
 use std::{sync::Arc, time::Instant};
+use crate::stats::{SimulationError, SimulationStats};
 
 use crate::util::print_hms;
 
@@ -18,57 +19,44 @@ pub struct CubeArgs {
     start: usize,
 }
 
-fn print(moves: &[u64]) {
-    let min_moves = moves.iter().min().expect("Move array empty.");
-    let min_moves_count = moves
-        .iter()
-        .filter(|&m| m == min_moves)
-        .collect::<Vec<_>>()
-        .len();
-    let move_sum: f64 = moves.iter().sum::<u64>() as f64;
-    let count = moves.len() as f64;
-    let mean = move_sum / count;
-
-    let variance = moves.iter().map(|&x| (x as f64 - mean).powi(2)).sum::<f64>()/count;
-    let std = f64::sqrt(variance);
-    let cov = std/mean;
-    let skew = moves.iter().map(|&x| ((x as f64 - mean)/std).powi(3)).sum::<f64>()/count;
-    let kurtosis = moves.iter().map(|&x| ((x as f64 - mean)/std).powi(4)).sum::<f64>()/count;
-
-    println!("Shortest Path Length: {}", min_moves);
-    println!(
-        "Shortest Path Fraction: {}",
-        (min_moves_count as f64) / (moves.len() as f64)
-    );
-
-    println!("Mean moves: {}", mean);
-    println!("Variance: {}", variance);
-    println!("Standard deviation: {}", std);
-    println!("Coefficient of Variation: {}", cov);
-    println!("Skew: {}", skew);
-    println!("Kurtosis: {}", kurtosis)
+impl CubeArgs {
+    /// Validate the command line arguments
+    fn validate(&self) -> Result<(), SimulationError> {
+        if self.num_iterations == 0 {
+            return Err(SimulationError::InvalidIterationCount(self.num_iterations));
+        }
+        if self.dim <= 0 {
+            return Err(SimulationError::InvalidTarget(self.dim as i64));
+        }
+        if self.start >= usize::from(2usize.pow(u32::from(self.dim))) {
+            return Err(SimulationError::InvalidTarget(self.start as i64))
+        }
+        Ok(())
+    }
 }
 
-pub fn cube_sim(args: CubeArgs) {
-    let dim = args.dim;
-    let num_iterations = args.num_iterations;
-    let start = args.start;
-    let end = (1 << dim) - 1;
-    let possible_moves = Arc::new((0..dim).collect::<Vec<u8>>());
+pub fn cube_sim(args: CubeArgs) -> Result<(), SimulationError> {
+    args.validate()?;
+
+    let end = (1 << args.dim) - 1;
+    let possible_moves = Arc::new((0..args.dim).collect::<Vec<u8>>());
 
     let start_time = Instant::now();
 
-    let moves: Vec<u64> = (0..num_iterations)
+    let moves = (0..args.num_iterations)
         .into_par_iter()
-        .map(|_| simulate_single_path(&possible_moves, start, end))
-        .collect();
+        .map(|_| simulate_single_path(&possible_moves, args.start, end))
+        .collect::<Result<Vec<_>, _>>()?;
 
     print_hms(&start_time);
 
-    print(&moves);
+    let stats = SimulationStats::from_moves(&moves)?;
+    stats.print();
+
+    Ok(())
 }
 
-fn simulate_single_path(possible_moves: &Arc<Vec<u8>>, start: usize, end: usize) -> u64 {
+fn simulate_single_path(possible_moves: &Arc<Vec<u8>>, start: usize, end: usize) -> Result<u64, SimulationError> {
     let mut current_corner = start;
     let mut move_count = 0;
     let mut rng = thread_rng();
@@ -81,5 +69,5 @@ fn simulate_single_path(possible_moves: &Arc<Vec<u8>>, start: usize, end: usize)
         move_count += 1;
     }
 
-    move_count
+    Ok(move_count)
 }

@@ -2,6 +2,7 @@ use std::time::Instant;
 use clap::{Args, value_parser};
 use rand::Rng;
 use rayon::prelude::*;
+use crate::stats::{SimulationError, SimulationStats};
 use crate::util::print_hms;
 
 #[derive(Args)]
@@ -13,55 +14,38 @@ pub struct SimplexArgs {
     dim: u64,
 }
 
-fn print(moves: &[u64]) {
-    let min_moves = moves.iter().min().expect("Move array empty.");
-    let min_moves_count = moves
-        .iter()
-        .filter(|&m| m == min_moves)
-        .collect::<Vec<_>>()
-        .len();
-    let move_sum: f64 = moves.iter().sum::<u64>() as f64;
-    let count = moves.len() as f64;
-    let mean = move_sum / count;
-
-    let sum_squares: f64 = moves.iter().map(|&x|  x.pow(2)).sum::<u64>() as f64;
-    let variance = (sum_squares / count) - (mean * mean);
-    let std = f64::sqrt(variance);
-    let cov = std/mean;
-    let skew = moves.iter().map(|&x| ((x as f64 - mean)/std).powi(3)).sum::<f64>()/count;
-    let kurtosis = moves.iter().map(|&x| ((x as f64 - mean)/std).powi(4)).sum::<f64>()/count;
-
-    println!("Shortest Path Length: {}", min_moves);
-    println!(
-        "Shortest Path Fraction: {}",
-        (min_moves_count as f64) / (moves.len() as f64)
-    );
-
-    println!("Mean moves: {}", mean);
-    println!("Variance: {}", variance);
-    println!("Standard deviation: {}", std);
-    println!("Coefficient of Variation: {}", cov);
-    println!("Skew: {}", skew);
-    println!("Kurtosis: {}", kurtosis)
+impl SimplexArgs {
+    /// Validate the command line arguments
+    fn validate(&self) -> Result<(), SimulationError> {
+        if self.num_iterations == 0 {
+            return Err(SimulationError::InvalidIterationCount(self.num_iterations));
+        }
+        if self.dim <= 0 {
+            return Err(SimulationError::InvalidTarget(self.dim as i64));
+        }
+        Ok(())
+    }
 }
 
-pub fn simplex_sim(args: SimplexArgs) {
-    let num_iterations = args.num_iterations;
-    let dim = args.dim;
+pub fn simplex_sim(args: SimplexArgs) -> Result<(), SimulationError> {
+    args.validate()?;
 
     let start_time = Instant::now();
 
-    let moves = (0..num_iterations)
+    let moves = (0..args.num_iterations)
         .into_par_iter()
-        .map(|_| simulate_single_path(dim))
-        .collect::<Vec<_>>();
+        .map(|_| simulate_single_path(args.dim))
+        .collect::<Result<Vec<_>, _>>()?;
 
     print_hms(&start_time);
 
-    print(&moves);
+    let stats = SimulationStats::from_moves(&moves)?;
+    stats.print();
+
+    Ok(())
 }
 
-fn simulate_single_path(n: u64) -> u64 {
+fn simulate_single_path(n: u64) -> Result<u64, SimulationError> {
     let mut rng = rand::thread_rng();
     let mut x = 0;
     let mut count = 0;
@@ -71,5 +55,5 @@ fn simulate_single_path(n: u64) -> u64 {
         count += 1;
     }
 
-    count
+    Ok(count)
 }

@@ -11,6 +11,7 @@ mod shuffle;
 mod snl;
 mod util;
 mod simplex;
+mod stats;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -40,11 +41,11 @@ fn main() {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Cube(args) => cube_sim(args),
-        Commands::Octo(args) => octo_sim(args),
+        Commands::Cube(args) => cube_sim(args).expect("Hypercube Simulation."),
+        Commands::Octo(args) => octo_sim(args).expect("Otoplex Simulation."),
         Commands::Shuffle(args) => shuffle_instance(args),
         Commands::ShuffleSim(args) => shuffle_sim(args),
-        Commands::Simplex(args) => simplex_sim(args),
+        Commands::Simplex(args) => simplex_sim(args).expect("Simplex Simulation."),
         Commands::SnakesLadders(args) => snakes_n_ladders(args),
         Commands::SnlSimulation(args) => snl_simulation(args),
     }
