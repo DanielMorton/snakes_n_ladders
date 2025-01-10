@@ -74,7 +74,9 @@ fn create_snakes_and_ladders_map() -> HashMap<usize, usize> {
     ])
 }
 
-fn create_transition_matrix(snl_map: &HashMap<usize, usize>) -> Result<Vec<Vec<f64>>, SimulationError> {
+fn create_transition_matrix(
+    snl_map: &HashMap<usize, usize>,
+) -> Result<Vec<Vec<f64>>, SimulationError> {
     let mut matrix = vec![vec![0.0; BOARD_SIZE + 1]; BOARD_SIZE + 1];
 
     for (i, row) in matrix.iter_mut().enumerate().take(BOARD_SIZE + 1) {
@@ -96,10 +98,17 @@ pub fn snl_simulation(args: SnlArgs) -> Result<(), SimulationError> {
     let transition_matrix = create_transition_matrix(&snl_map)?;
     let possible_positions = Arc::new((0..=BOARD_SIZE).collect::<Vec<usize>>());
     (0..=98).filter(|s| !snl_map.contains_key(s)).for_each(|s| {
-        let moves = simulate_games(args.num_iterations, s, &transition_matrix, &possible_positions).expect("Simulation Failed");
+        let moves = simulate_games(
+            args.num_iterations,
+            s,
+            &transition_matrix,
+            &possible_positions,
+        )
+        .expect("Simulation Failed");
         let stats = SnlStatistics::new(s, &moves).expect("Failed to Create Statistics");
         if s == 0 {
-            writeln!(file, "{}", format!("start,{}", stats.write_header())).expect("Failed to write header");
+            writeln!(file, "{}", format!("start,{}", stats.write_header()))
+                .expect("Failed to write header");
         }
         stats.write_statistics(&mut file);
     });
@@ -127,8 +136,6 @@ pub fn snakes_n_ladders(args: SnlArgs) -> Result<(), SimulationError> {
     stats.print();
     Ok(())
 }
-
-
 
 fn simulate_games(
     num_iterations: u64,
