@@ -128,13 +128,12 @@ impl GameBoard {
 
         for (i, row) in matrix.iter_mut().enumerate().take(BOARD_SIZE + 1) {
             if !transitions.contains_key(&i) {
-                for j in (i + 1)..=min(i + DICE_SIDES, BOARD_SIZE) {
-                    let destination = *transitions.get(&j).unwrap_or(&j);
+                for j in (i + 1)..=(i + DICE_SIDES) {
+                    let destination = *min(transitions.get(&j).unwrap_or(&j), &BOARD_SIZE);
                     row[destination] += 1.0 / DICE_SIDES as f64;
                 }
             }
         }
-
         Ok(matrix)
     }
 
