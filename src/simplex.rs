@@ -27,9 +27,9 @@ fn print(moves: &[u64]) {
     let sum_squares: f64 = moves.iter().map(|&x|  x.pow(2)).sum::<u64>() as f64;
     let variance = (sum_squares / count) - (mean * mean);
     let std = f64::sqrt(variance);
-    let sum_cubes = moves.iter().map(|&x| x.pow(3)).sum::<u64>() as f64;
-    let mean_cubes = sum_cubes/count;
+    let cov = std/mean;
     let skew = moves.iter().map(|&x| ((x as f64 - mean)/std).powi(3)).sum::<f64>()/count;
+    let kurtosis = moves.iter().map(|&x| ((x as f64 - mean)/std).powi(4)).sum::<f64>()/count;
 
     println!("Shortest Path Length: {}", min_moves);
     println!(
@@ -40,8 +40,9 @@ fn print(moves: &[u64]) {
     println!("Mean moves: {}", mean);
     println!("Variance: {}", variance);
     println!("Standard deviation: {}", std);
+    println!("Coefficient of Variation: {}", cov);
     println!("Skew: {}", skew);
-    println!("Mean Cubes: {}", mean_cubes)
+    println!("Kurtosis: {}", kurtosis)
 }
 
 pub fn simplex_sim(args: SimplexArgs) {

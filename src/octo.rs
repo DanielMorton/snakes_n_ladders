@@ -27,10 +27,9 @@ fn print(moves: &[u64]) {
     let sum_squares: f64 = moves.iter().map(|&x|  x.pow(2)).sum::<u64>() as f64;
     let variance = (sum_squares / count) - (mean * mean);
     let std = f64::sqrt(variance);
-    let sum_cubes: f64 = moves.iter().map(|&x| x.pow(3)).sum::<u64>() as f64;
-    let mean_cubes = sum_cubes/count;
-    let m3 = mean_cubes - 3.0 * mean * variance - mean.powi(3);
-    let skew = m3/std.powi(3);
+    let cov = std/mean;
+    let skew = moves.iter().map(|&x| ((x as f64 - mean)/std).powi(3)).sum::<f64>()/count;
+    let kurtosis = moves.iter().map(|&x| ((x as f64 - mean)/std).powi(4)).sum::<f64>()/count;
 
     println!("Shortest Path Length: {}", min_moves);
     println!(
@@ -41,8 +40,9 @@ fn print(moves: &[u64]) {
     println!("Mean moves: {}", mean);
     println!("Variance: {}", variance);
     println!("Standard deviation: {}", std);
+    println!("Coefficient of Variation: {}", cov);
     println!("Skew: {}", skew);
-    println!("Mean Cubes: {}", mean_cubes)
+    println!("Kurtosis: {}", kurtosis)
 }
 
 pub fn octo_sim(args: OctoArgs) {

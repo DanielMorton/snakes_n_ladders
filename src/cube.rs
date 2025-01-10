@@ -31,7 +31,9 @@ fn print(moves: &[u64]) {
 
     let variance = moves.iter().map(|&x| (x as f64 - mean).powi(2)).sum::<f64>()/count;
     let std = f64::sqrt(variance);
+    let cov = std/mean;
     let skew = moves.iter().map(|&x| ((x as f64 - mean)/std).powi(3)).sum::<f64>()/count;
+    let kurtosis = moves.iter().map(|&x| ((x as f64 - mean)/std).powi(4)).sum::<f64>()/count;
 
     println!("Shortest Path Length: {}", min_moves);
     println!(
@@ -42,7 +44,9 @@ fn print(moves: &[u64]) {
     println!("Mean moves: {}", mean);
     println!("Variance: {}", variance);
     println!("Standard deviation: {}", std);
-    println!("Skew: {}", skew)
+    println!("Coefficient of Variation: {}", cov);
+    println!("Skew: {}", skew);
+    println!("Kurtosis: {}", kurtosis)
 }
 
 pub fn cube_sim(args: CubeArgs) {
