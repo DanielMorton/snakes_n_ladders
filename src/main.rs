@@ -1,17 +1,17 @@
 use crate::cube::{cube_sim, CubeArgs};
 use crate::octo::{octo_sim, OctoArgs};
 use crate::shuffle::{shuffle_instance, shuffle_sim, ShuffleArgs};
+use crate::simplex::{simplex_sim, SimplexArgs};
 use crate::snl::{snakes_n_ladders, snl_simulation, SnlArgs};
-use clap::{Parser, Subcommand};
-use crate::simplex::{simplex_sim, SimplexArgs}; // Added the necessary imports
+use clap::{Parser, Subcommand}; // Added the necessary imports
 
 mod cube;
 mod octo;
 mod shuffle;
-mod snl;
-mod util;
 mod simplex;
+mod snl;
 mod stats;
+mod util;
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]

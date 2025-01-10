@@ -1,9 +1,9 @@
+use crate::stats::{SimulationError, SimulationStats};
 use clap::{value_parser, Args};
 use rand::prelude::SliceRandom;
 use rand::thread_rng;
 use rayon::prelude::*;
 use std::{sync::Arc, time::Instant};
-use crate::stats::{SimulationError, SimulationStats};
 
 use crate::util::print_hms;
 
@@ -29,7 +29,7 @@ impl CubeArgs {
             return Err(SimulationError::InvalidTarget(self.dim as i64));
         }
         if self.start >= usize::from(2usize.pow(u32::from(self.dim))) {
-            return Err(SimulationError::InvalidTarget(self.start as i64))
+            return Err(SimulationError::InvalidTarget(self.start as i64));
         }
         Ok(())
     }
@@ -56,7 +56,11 @@ pub fn cube_sim(args: CubeArgs) -> Result<(), SimulationError> {
     Ok(())
 }
 
-fn simulate_single_path(possible_moves: &Arc<Vec<u8>>, start: usize, end: usize) -> Result<u64, SimulationError> {
+fn simulate_single_path(
+    possible_moves: &Arc<Vec<u8>>,
+    start: usize,
+    end: usize,
+) -> Result<u64, SimulationError> {
     let mut current_corner = start;
     let mut move_count = 0;
     let mut rng = thread_rng();

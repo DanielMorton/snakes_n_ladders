@@ -46,7 +46,7 @@ impl SimulationStats {
 
         if std_deviation == 0.0 {
             return Err(SimulationError::StatisticalError(
-                "Standard deviation is zero".to_string()
+                "Standard deviation is zero".to_string(),
             ));
         }
 
@@ -75,7 +75,6 @@ impl SimulationStats {
     }
 }
 
-
 // Helper functions for statistical calculations
 pub fn calculate_mean(values: &[u64]) -> Result<f64, SimulationError> {
     if values.is_empty() {
@@ -91,9 +90,7 @@ pub fn calculate_variance(values: &[u64], mean: f64) -> Result<f64, SimulationEr
         return Err(SimulationError::EmptyMoveArray);
     }
 
-    let sum_squares = values.iter()
-        .map(|&x| x.pow(2))
-        .sum::<u64>() as f64;
+    let sum_squares = values.iter().map(|&x| x.pow(2)).sum::<u64>() as f64;
     let count = values.len() as f64;
     Ok((sum_squares / count) - (mean * mean))
 }
@@ -104,14 +101,16 @@ pub fn calculate_skewness(values: &[u64], mean: f64, std_dev: f64) -> Result<f64
     }
     if std_dev == 0.0 {
         return Err(SimulationError::StatisticalError(
-            "Standard deviation is zero when calculating skewness".to_string()
+            "Standard deviation is zero when calculating skewness".to_string(),
         ));
     }
 
     let count = values.len() as f64;
-    Ok(values.iter()
+    Ok(values
+        .iter()
         .map(|&x| ((x as f64 - mean) / std_dev).powi(3))
-        .sum::<f64>() / count)
+        .sum::<f64>()
+        / count)
 }
 
 pub fn calculate_kurtosis(values: &[u64], mean: f64, std_dev: f64) -> Result<f64, SimulationError> {
@@ -120,12 +119,14 @@ pub fn calculate_kurtosis(values: &[u64], mean: f64, std_dev: f64) -> Result<f64
     }
     if std_dev == 0.0 {
         return Err(SimulationError::StatisticalError(
-            "Standard deviation is zero when calculating kurtosis".to_string()
+            "Standard deviation is zero when calculating kurtosis".to_string(),
         ));
     }
 
     let count = values.len() as f64;
-    Ok(values.iter()
+    Ok(values
+        .iter()
         .map(|&x| ((x as f64 - mean) / std_dev).powi(4))
-        .sum::<f64>() / count)
+        .sum::<f64>()
+        / count)
 }

@@ -1,10 +1,9 @@
+use crate::stats::{SimulationError, SimulationStats};
 use crate::util::print_hms;
 use clap::{value_parser, Args};
 use rand::Rng;
 use rayon::prelude::*;
 use std::time::Instant;
-use crate::stats::{SimulationError, SimulationStats};
-
 
 /// Command line arguments for the octopus simulation
 #[derive(Args)]
@@ -78,4 +77,3 @@ fn simulate_single_path(target: i64) -> Result<u64, SimulationError> {
 
     Ok(moves)
 }
-

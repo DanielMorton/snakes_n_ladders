@@ -1,9 +1,9 @@
-use std::time::Instant;
-use clap::{Args, value_parser};
-use rand::Rng;
-use rayon::prelude::*;
 use crate::stats::{SimulationError, SimulationStats};
 use crate::util::print_hms;
+use clap::{value_parser, Args};
+use rand::Rng;
+use rayon::prelude::*;
+use std::time::Instant;
 
 #[derive(Args)]
 pub struct SimplexArgs {
