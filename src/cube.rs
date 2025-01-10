@@ -15,8 +15,8 @@ pub struct CubeArgs {
     #[arg(long = "dim", required = true, value_parser = value_parser!(u8))]
     dim: u8,
 
-    #[arg(long = "start", required = false, value_parser = value_parser!(usize), default_value="0")]
-    start: usize,
+    #[arg(long = "start", required = false, value_parser = value_parser!(u8), default_value="0")]
+    start: u8,
 }
 
 impl CubeArgs {
@@ -28,7 +28,7 @@ impl CubeArgs {
         if self.dim <= 0 {
             return Err(SimulationError::InvalidTarget(self.dim as i64));
         }
-        if self.start >= usize::from(2usize.pow(u32::from(self.dim))) {
+        if self.start >= self.dim {
             return Err(SimulationError::InvalidTarget(self.start as i64));
         }
         Ok(())
@@ -38,6 +38,8 @@ impl CubeArgs {
 pub fn cube_sim(args: CubeArgs) -> Result<(), SimulationError> {
     args.validate()?;
 
+    let start = (1 << args.start) - 1;
+
     let end = (1 << args.dim) - 1;
     let possible_moves = Arc::new((0..args.dim).collect::<Vec<u8>>());
 
@@ -45,7 +47,7 @@ pub fn cube_sim(args: CubeArgs) -> Result<(), SimulationError> {
 
     let moves = (0..args.num_iterations)
         .into_par_iter()
-        .map(|_| simulate_single_path(&possible_moves, args.start, end))
+        .map(|_| simulate_single_path(&possible_moves, start, end))
         .collect::<Result<Vec<_>, _>>()?;
 
     print_hms(&start_time);
