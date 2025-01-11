@@ -8,6 +8,16 @@ use std::{
     path::Path,
     time::Instant,
 };
+use thiserror::Error;
+
+/// Represents errors that can occur during shuffle operations
+#[derive(Error, Debug)]
+pub enum ShuffleError {
+    #[error("IO error: {0}")]
+    IoError(#[from] io::Error),
+    #[error("Invalid Input: {0} must be greater than zero")]
+    InvalidInputError(u32),
+}
 
 /// Command line arguments for shuffle operations
 #[derive(Args)]
@@ -17,16 +27,13 @@ pub struct ShuffleArgs {
     n: u32,
 }
 
-/// Represents errors that can occur during shuffle operations
-#[derive(Debug)]
-pub enum ShuffleError {
-    IoError(io::Error),
-    InvalidInputError(String),
-}
-
-impl From<io::Error> for ShuffleError {
-    fn from(error: io::Error) -> Self {
-        ShuffleError::IoError(error)
+impl ShuffleArgs {
+    /// Validate command line arguments
+    fn validate(&self) -> Result<(), ShuffleError> {
+        if self.n <= 0 {
+            return Err(ShuffleError::InvalidInputError(self.n));
+        }
+        Ok(())
     }
 }
 
@@ -49,12 +56,8 @@ fn shuffle(array: &[u32]) -> Vec<u32> {
 /// * `cards` - Total number of cards (must be even)
 ///
 /// # Returns
-/// * Number of shuffles needed to return to original order
-fn shuffle_count(cards: u32) -> u32 {
-    if cards % 2 != 0 {
-        panic!("Number of cards must be even");
-    }
-
+/// * Result with number of shuffles needed or error if input is invalid
+fn shuffle_count(cards: u32) -> Result<u32, ShuffleError> {
     let original = (1..=cards).collect::<Vec<_>>();
     let mut current = shuffle(&original);
     let mut count = 1;
@@ -63,7 +66,7 @@ fn shuffle_count(cards: u32) -> u32 {
         current = shuffle(&current);
         count += 1;
     }
-    count
+    Ok(count)
 }
 
 /// Writes shuffle results to a CSV file
@@ -73,7 +76,7 @@ fn shuffle_count(cards: u32) -> u32 {
 /// * `filename` - Name of the output file
 ///
 /// # Returns
-/// * Result indicating success or failure
+/// * Result indicating success or failure with error message
 fn write_result(shuffles: &[u32], filename: &str) -> Result<(), ShuffleError> {
     let path = Path::new(filename);
     let mut file = File::create(path)?;
@@ -90,29 +93,24 @@ fn write_result(shuffles: &[u32], filename: &str) -> Result<(), ShuffleError> {
 
 /// Runs a single shuffle simulation
 pub fn shuffle_instance(args: ShuffleArgs) -> Result<(), ShuffleError> {
+    args.validate()?;
     let cards = 2 * args.n;
-    if cards == 0 {
-        return Err(ShuffleError::InvalidInputError("Number of cards must be greater than 0".to_string()));
-    }
 
-    let count = shuffle_count(cards);
+    let count = shuffle_count(cards)?;
     println!("Number of Shuffles: {}", count);
     Ok(())
 }
 
 /// Runs multiple shuffle simulations in parallel
 pub fn shuffle_sim(args: ShuffleArgs) -> Result<(), ShuffleError> {
+    args.validate()?;
     let start_time = Instant::now();
     let max_cards = args.n;
 
-    if max_cards == 0 {
-        return Err(ShuffleError::InvalidInputError("Number of cards must be greater than 0".to_string()));
-    }
-
-    let shuffles: Vec<_> = (1..=max_cards)
+    let shuffles = (1..=max_cards)
         .into_par_iter()
         .map(|c| shuffle_count(2 * c))
-        .collect();
+        .collect::<Result<Vec<_>, _>>()?;
 
     write_result(&shuffles, "shuffle_results.csv")?;
     print_hms(&start_time);
