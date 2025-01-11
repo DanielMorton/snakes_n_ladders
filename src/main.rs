@@ -43,8 +43,8 @@ fn main() {
     match cli.command {
         Commands::Cube(args) => cube_sim(args).expect("Hypercube Simulation."),
         Commands::Octo(args) => octo_sim(args).expect("Otoplex Simulation."),
-        Commands::Shuffle(args) => shuffle_instance(args),
-        Commands::ShuffleSim(args) => shuffle_sim(args),
+        Commands::Shuffle(args) => shuffle_instance(args).expect("Card Shuffle"),
+        Commands::ShuffleSim(args) => shuffle_sim(args).expect("Card Shuffle"),
         Commands::Simplex(args) => simplex_sim(args).expect("Simplex Simulation."),
         Commands::SnakesLadders(args) => {
             snakes_n_ladders(args).expect("Single Run Snakes and Ladders.")
