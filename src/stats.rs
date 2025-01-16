@@ -85,16 +85,16 @@ impl SimulationStats {
     pub(crate) fn header(&self) -> String {
         format!(
             "{},{},{},{},{},{},{},{},{},{}",
-            stringify!(self.min_moves),
-            stringify!(self.max_moves),
-            stringify!(self.min_moves_fraction),
-            stringify!(self.mean),
-            stringify!(self.variance),
-            stringify!(self.std_deviation),
-            stringify!(self.coeff_variation),
-            stringify!(self.skewness),
-            stringify!(self.kurtosis),
-            stringify!(self.median)
+            stringify!(min_moves),
+            stringify!(max_moves),
+            stringify!(min_moves_fraction),
+            stringify!(mean),
+            stringify!(variance),
+            stringify!(std_deviation),
+            stringify!(coeff_variation),
+            stringify!(skewness),
+            stringify!(kurtosis),
+            stringify!(median)
         )
     }
 
